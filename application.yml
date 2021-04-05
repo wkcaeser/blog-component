@@ -1,0 +1,12 @@
+mysql:
+  # root:123456@tcp(127.0.0.1:3306)/blog_component?parseTime=true
+  url:
+  max-open-conns: 20
+  max-idle-conns: 20
+
+cors:
+  access-control-allow-origins: '*.wkcaeser.com'
+  access-control-allow-methods: 'GET'
+  access-control-allow-headers: '*'
+  access-control-expose-headers: '*'
+  access-control-allow-credentials: true
