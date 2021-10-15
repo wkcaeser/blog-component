@@ -29,6 +29,7 @@ CREATE TABLE user_token (
 
 CREATE TABLE access_log (
                                id bigint not null auto_increment comment 'id',
+                               gmt_create  datetime default CURRENT_TIMESTAMP null comment '记录时间',
                                user_uuid varchar(32) not null comment 'uuid',
                                uri varchar(128) not null comment 'uri',
                                site varchar(128) not null comment 'site',
