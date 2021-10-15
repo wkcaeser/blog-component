@@ -106,7 +106,8 @@ function sendMetric() {
         }
     };
 
-    xhr.open("get", "https://tapi.wkcaeser.com/o/info?biz=pv&uuid=" + getUuid() + "&" + "uri=" + document.URL, true);
+    // xhr.open("get", "https://tapi.wkcaeser.com/o/info?biz=pv&uuid=" + getUuid() + "&" + "uri=" + document.URL, true);
+    xhr.open("get", "http://127.0.0.1:8080/log?biz=pv&uuid=" + getUuid() + "&" + "uri=" + document.URL, true);
     xhr.send(null);
 }
 

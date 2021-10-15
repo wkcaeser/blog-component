@@ -39,3 +39,6 @@ CREATE TABLE access_log (
                                index idx_uuid (user_uuid),
                                index idx_uri(uri)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment 'url访问统计表';
+
+
+SELECT count(distinct user_uuid) as PeopleTotal from access_log;

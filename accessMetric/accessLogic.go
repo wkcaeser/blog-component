@@ -31,15 +31,15 @@ func (*AccessLogImpl) GetUriMetric(uri string, uuid string) PvMetric {
 
 	var pvMetric PvMetric
 
-	stmtPv := db.Stmt("SELECT count(*) as PeoplePv from access_metric WHERE uri = ?")
+	stmtPv := db.Stmt("SELECT count(*) as PeoplePv from access_log WHERE uri = ?")
 
 	defer stmtPv.Close()
 	stmtPv.QueryRow(uri).Scan(&pvMetric.PeoplePv)
 
-	stmtTotal := db.Stmt("SELECT count(distinct user_uuid) as PeopleTotal cnt from access_metric")
+	stmtTotal := db.Stmt("SELECT count(distinct user_uuid) as PeopleTotal from access_log")
 
 	defer stmtTotal.Close()
-	stmtTotal.QueryRow(uri).Scan(&pvMetric.PeopleTotal)
+	stmtTotal.QueryRow().Scan(&pvMetric.PeopleTotal)
 
 	return pvMetric
 }

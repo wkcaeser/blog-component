@@ -5,7 +5,7 @@ mysql:
   max-idle-conns: 20
 
 cors:
-  access-control-allow-origins: '*.wkcaeser.com'
+  access-control-allow-origins: '*'
   access-control-allow-methods: 'GET'
   access-control-allow-headers: '*'
   access-control-expose-headers: '*'
