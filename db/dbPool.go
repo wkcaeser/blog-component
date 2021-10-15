@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"os"
 )
 
 var DbPool *sql.DB
@@ -20,7 +21,13 @@ func Stmt(sql string) *sql.Stmt {
 
 func init() {
 
-	db, err := sql.Open("mysql", config.GlobalConf.Mysql.Url)
+	url := config.GlobalConf.Mysql.Url
+
+	if url == "" {
+		url = os.Getenv("database_url")
+	}
+
+	db, err := sql.Open("mysql", url)
 	if err != nil {
 		log.Panicln("db err: ", err.Error())
 	}
