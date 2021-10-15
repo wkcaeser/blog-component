@@ -67,7 +67,7 @@ func main() {
 		c.JSON(http.StatusOK, &pvMetric)
 	})
 
-	e := route.Run()
+	e := route.Run("127.0.0.1:8080")
 
 	if e != nil {
 		panic(e)
