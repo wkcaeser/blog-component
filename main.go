@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -31,7 +32,7 @@ func Cors() gin.HandlerFunc {
 
 func main() {
 
-	accessLogicImpl := urlMetric.AccessLogicImpl{}
+	accessLogImpl := urlMetric.AccessLogImpl{}
 
 	route := gin.Default()
 	route.Use(Cors())
@@ -40,29 +41,30 @@ func main() {
 		c.String(http.StatusOK, "Hello World")
 	})
 
-	route.GET("/pageMetric", func(c *gin.Context) {
-		url := c.Query("url")
-		if url == "" {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
+	route.GET("/log", func(c *gin.Context) {
+		biz := c.Query("biz")
+		if biz != "pv" {
+			c.JSON(http.StatusNotFound, "biz invalid")
+		}
+		log := urlMetric.AccessLog{}
+
+		log.ReqUri = c.Query("uri")
+		log.UserUuid = c.Query("uuid")
+
+		log.Ip = c.ClientIP()
+		if log.Ip == "::1" {
+			log.Ip = "127.0.0.1"
 		}
 
-		accessMetric := accessLogicImpl.GetUrlMetric(url)
-		c.JSON(http.StatusOK, &accessMetric)
-	})
+		log.Site = c.GetHeader("origin")
+		log.Uri = log.ReqUri[len(log.Site) : len(log.ReqUri)-1]
 
-	route.GET("/browse").GET("/page", func(c *gin.Context) {
-		url := c.Query("url")
-		if url == "" {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		accessMetric := urlMetric.AccessMetric{}
-		accessMetric.Url = url
-		accessMetric.BrowseUserCnt = 1
-		accessLogicImpl.PutUrlMetric(&accessMetric)
+		marshal, _ := json.Marshal(c)
+		log.RequestLog = string(marshal)
 
-		c.Status(http.StatusOK)
+		accessLogImpl.PutUrlMetric(&log)
+		pvMetric := accessLogImpl.GetUriMetric(log.Uri, log.UserUuid)
+		c.JSON(http.StatusOK, &pvMetric)
 	})
 
 	e := route.Run()

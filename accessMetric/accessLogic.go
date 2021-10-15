@@ -1,52 +1,50 @@
 package accessMetric
 
-import db "blog-component/db"
+import (
+	db "blog-component/db"
+)
 
-type AccessMetric struct {
-	Id            int64  `json:"id"`
-	Url           string `json:"url"`
-	BrowseCnt     int64  `json:"browse_cnt"`
-	BrowseUserCnt int64  `json:"browse_user_cnt"`
-	Comment       string `json:"comment"`
+type AccessLog struct {
+	Id         int64  `json:"id"`
+	UserUuid   string `json:"user_uuid"`
+	Uri        string `json:"uri"`
+	Site       string `json:"site"`
+	ReqUri     string `json:"req_uri"`
+	Ip         string `json:"ip"`
+	RequestLog string `json:"request_log"`
 }
 
-type AccessLogicImpl struct {
+type PvMetric struct {
+	PeopleTotal int64 `json:"peopleTotal"`
+	PeoplePv    int64 `json:"peoplePv"`
 }
 
-type AccessLogic interface {
-	GetUrlMetric(url string) *AccessMetric
-	PutUrlMetric(metric *AccessMetric)
+type AccessLogImpl struct {
 }
 
-func (*AccessLogicImpl) GetUrlMetric(url string) *AccessMetric {
-
-	metric := &AccessMetric{}
-
-	stmt := db.Stmt("SELECT id, url, browse_cnt, browse_user_cnt, comment from access_metric WHERE url = ?")
-
-	defer stmt.Close()
-
-	row := stmt.QueryRow(url)
-	if row != nil {
-		row.Scan(&metric.Id, &metric.Url, &metric.BrowseCnt, &metric.BrowseUserCnt, &metric.Comment)
-	}
-
-	return metric
+type IAccessLog interface {
+	GetUriMetric(url string) PvMetric
+	PutUriMetric(metric *AccessLog)
 }
 
-func (impl AccessLogicImpl) PutUrlMetric(metric *AccessMetric) {
+func (*AccessLogImpl) GetUriMetric(uri string, uuid string) PvMetric {
 
-	if metric.Url == "" {
-		return
-	}
+	var pvMetric PvMetric
 
-	dbSavedMetric := impl.GetUrlMetric(metric.Url)
+	stmtPv := db.Stmt("SELECT count(*) as PeoplePv from access_metric WHERE uri = ?")
 
-	if dbSavedMetric.Id == 0 {
-		stmt := db.Stmt("insert into access_metric(url, browse_cnt, browse_user_cnt, comment) values (?, ?, ?, ?)")
-		stmt.Exec(metric.Url, metric.BrowseCnt, metric.BrowseUserCnt, metric.Comment)
-	} else {
-		stmt := db.Stmt("update access_metric set browse_cnt = browse_cnt + ?, browse_user_cnt = browse_user_cnt + ? where id = ?")
-		stmt.Exec(metric.BrowseCnt, metric.BrowseUserCnt, dbSavedMetric.Id)
-	}
+	defer stmtPv.Close()
+	stmtPv.QueryRow(uri).Scan(&pvMetric.PeoplePv)
+
+	stmtTotal := db.Stmt("SELECT count(distinct user_uuid) as PeopleTotal cnt from access_metric")
+
+	defer stmtTotal.Close()
+	stmtTotal.QueryRow(uri).Scan(&pvMetric.PeopleTotal)
+
+	return pvMetric
+}
+
+func (*AccessLogImpl) PutUrlMetric(accessLog *AccessLog) {
+	stmt := db.Stmt("insert into access_log (user_uuid, uri, site, req_uri, ip, request_log) values (?, ?, ?, ?, ?, ?)")
+	stmt.Exec(accessLog.UserUuid, accessLog.Uri, accessLog.Site, accessLog.ReqUri, accessLog.Ip, accessLog.RequestLog)
 }

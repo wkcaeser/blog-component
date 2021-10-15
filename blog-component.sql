@@ -27,12 +27,15 @@ CREATE TABLE user_token (
                             unique (token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment '用户token表';
 
-CREATE TABLE access_metric (
+CREATE TABLE access_log (
                                id bigint not null auto_increment comment 'id',
-                               url varchar(128) not null comment 'url',
-                               browse_cnt bigint not null comment '访问次数统计表',
-                               browse_user_Cnt bigint not null comment '访问人次统计表',
-                               comment varchar(128) not null comment 'url备注',
+                               user_uuid varchar(32) not null comment 'uuid',
+                               uri varchar(128) not null comment 'uri',
+                               site varchar(128) not null comment 'site',
+                               req_uri varchar(256) comment 'req_uri',
+                               ip varchar(128) comment 'source_ip',
+                               request_log longtext not null comment '请求信息',
                                primary key (id),
-                               unique (url)
+                               index idx_uuid (user_uuid),
+                               index idx_uri(uri)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 comment 'url访问统计表';
